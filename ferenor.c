@@ -1,62 +1,86 @@
 #include "ferenor.h"
 
+int handle_quit(char c, bool mode, WINDOW* w)
+{
+    if (mode && c == 'q')
+    {
+        return 2;
+    } 
+    else if (mode) 
+    {
+        mvwaddstr(w, 0, 0, "                                                     ");
+        wrefresh(w);
+        return 0;
+    }
+
+    if (c == KEY_F(1) || c == MS_KEY_F1)
+    {
+        mvwaddstr(w, 0, 0, "Press q to quit. Press any other key to continue");
+        wrefresh(w);
+        return 1;
+    }
+
+    return 0;
+}
+
 int main()
 {
     initscr();
     refresh();  // This needs to be here to make the windows appear.
-    raw();
+    cbreak();
     noecho();
+
+    WINDOW *active_win;
+    WINDOW *name_win = create_name_entry_window();
+    WINDOW *avatar_win = create_avatar_window();
+    WINDOW *class_win = create_class_window();
+    WINDOW *stat_win = create_stats_window();
+    WINDOW *help_win = create_help_window();
+    WINDOW *tip_win = create_tip_window();
+
     keypad(stdscr, TRUE);
+    keypad(name_win, TRUE);
+    keypad(avatar_win, TRUE);
+    keypad(class_win, TRUE);
+    keypad(stat_win, TRUE);
+    keypad(help_win, TRUE);
+    keypad(tip_win, TRUE);
 
-    WINDOW *name_win = create_window(3, 28, 0, 0);
-    WINDOW *avatar_win = create_window(20, 28, 5, 0);
-    WINDOW *class_win = create_window(9, 19, 0, 35);
-    WINDOW *stat_win = create_window(9, 19, 0, 60);
-    WINDOW *help_win = create_window(14, 44, 11, 35);
-
-    //mvwaddstr(name_win, 1, 1, "Name: ");
-    mvwprintw(name_win, 1, 1, "%d %d", LINES, COLS);
+    wmove(name_win, 1, 7);
     wrefresh(name_win);
 
-    mvwaddstr(class_win, 1, 1, "Class Selection");
-    mvwaddstr(class_win, 3, 1, "Druid");
-    mvwaddstr(class_win, 4, 1, "Mage");
-    mvwaddstr(class_win, 5, 1, "Rogue");
-    mvwaddstr(class_win, 6, 1, "Warrior");
-    wrefresh(class_win);
-
-    mvwaddstr(stat_win, 1, 1, "Character Stats");
-    mvwaddstr(stat_win, 3, 1, "HP       : ");
-    mvwaddstr(stat_win, 4, 1, "Magic    : ");
-    mvwaddstr(stat_win, 5, 1, "Speed    : ");
-    mvwaddstr(stat_win, 6, 1, "Strength : ");
-    wrefresh(stat_win);
-
-    mvwaddstr(help_win, 1, 1, "Description");
-    wrefresh(help_win);
-
-    mvwaddstr(avatar_win, 1, 1, "Character Appearance");
-    mvwaddstr(avatar_win, 4, 12, "####");
-    mvwaddstr(avatar_win, 5, 12, "####");
-    mvwaddstr(avatar_win, 6, 12, "####");
-    mvwaddstr(avatar_win, 7, 13,  "##");
-    mvwaddstr(avatar_win, 8, 10, "########");
-    mvwaddstr(avatar_win, 9, 9, "##########");
-    mvwaddstr(avatar_win, 10, 8, "##  ####  ##");
-    mvwaddstr(avatar_win, 11, 7, "##   ####   ##");
-    mvwaddstr(avatar_win, 12, 12, "####");
-    mvwaddstr(avatar_win, 13, 11, "######");
-    mvwaddstr(avatar_win, 14, 11, "##  ##");
-    mvwaddstr(avatar_win, 15, 11, "##  ##");
-    mvwaddstr(avatar_win, 16, 11, "##  ##");
-    mvwaddstr(avatar_win, 17, 11, "##  ##");
-    
-    wrefresh(avatar_win);
+    active_win = name_win;
+    int cursorx, cursory;
+    cursorx = 7;
+    cursory = 1;
 
     char c;
-    while ((c = getch()) != 'q')
+    int quit_mode = 0;
+    while (true)
     {
+        c = wgetch(active_win);
 
+        quit_mode = handle_quit(c, quit_mode, tip_win);
+        if (quit_mode == 2)
+            break;
+        else if (quit_mode == 1)
+            continue;
+
+        if (active_win == name_win)
+        {
+            if (c == KEY_BACKSPACE || c == MS_KEY_BACKSPACE)
+            {
+                cursorx--;
+                mvwaddch(name_win, cursory, cursorx, ' ');
+                wmove(name_win, cursory, cursorx);
+            }
+            else 
+            {
+                mvwaddch(name_win, cursory, cursorx, c);
+                cursorx++;
+            }
+            wrefresh(name_win);
+        }
     }
 
     delwin(name_win);
@@ -64,6 +88,7 @@ int main()
     delwin(class_win);
     delwin(stat_win);
     delwin(help_win);
+    delwin(tip_win);
     endwin();
     return 0;
 }

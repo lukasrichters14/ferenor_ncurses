@@ -1,5 +1,5 @@
 ferenor: ferenor.c windows.c
-	gcc ferenor.c windows.c -o ferenor -lncurses
+	gcc -g ferenor.c windows.c -o ferenor -lncurses
 
 
 clean:

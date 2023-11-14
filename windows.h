@@ -3,10 +3,18 @@
 
 #include <ncurses.h>
 
-WINDOW* create_window(int height, int width, int y, int x);
+WINDOW* create_window(int height, int width, int y, int x, bool boarder);
 
-void create_name_entry_window(WINDOW *win);
+WINDOW* create_name_entry_window();
 
-void create_avatar_window(WINDOW *win);
+WINDOW* create_avatar_window();
+
+WINDOW* create_class_window();
+
+WINDOW* create_stats_window();
+
+WINDOW* create_help_window();
+
+WINDOW* create_tip_window();
 
 #endif
