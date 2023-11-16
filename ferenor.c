@@ -1,28 +1,5 @@
 #include "ferenor.h"
 
-int handle_quit(char c, bool mode, WINDOW* w)
-{
-    if (mode && c == 'q')
-    {
-        return 2;
-    } 
-    else if (mode) 
-    {
-        mvwaddstr(w, 0, 0, "                                                     ");
-        wrefresh(w);
-        return 0;
-    }
-
-    if (c == KEY_F(1) || c == MS_KEY_F1)
-    {
-        mvwaddstr(w, 0, 0, "Press q to quit. Press any other key to continue");
-        wrefresh(w);
-        return 1;
-    }
-
-    return 0;
-}
-
 int main()
 {
     initscr();
@@ -55,31 +32,104 @@ int main()
     cursory = 1;
 
     char c;
-    int quit_mode = 0;
+    bool is_in_select_mode = false;
     while (true)
     {
         c = wgetch(active_win);
 
-        quit_mode = handle_quit(c, quit_mode, tip_win);
-        if (quit_mode == 2)
-            break;
-        else if (quit_mode == 1)
-            continue;
-
-        if (active_win == name_win)
+        if (c == KEY_STAB || c == MS_KEY_TAB)
+            is_in_select_mode = true;
+        
+        if (is_in_select_mode)
         {
-            if (c == KEY_BACKSPACE || c == MS_KEY_BACKSPACE)
+            highlight_window(active_win);
+            mvwaddstr(tip_win, 0, 0, "ENTER: Select; ARROW: Move; Q: Quit");
+            wrefresh(tip_win);
+            if (c == 'q' || c == 'Q')
+                break;
+            else if (c == KEY_ENTER || c == MS_KEY_ENTER)
             {
-                cursorx--;
-                mvwaddch(name_win, cursory, cursorx, ' ');
-                wmove(name_win, cursory, cursorx);
+                is_in_select_mode = false;
+                mvwaddstr(tip_win, 0, 0, "                                            ");
+                mvwaddstr(tip_win, 0, 0, "TAB: Control mode; ARROW: Move");
+                wrefresh(tip_win);
+                unhighlight_window(active_win);
             }
-            else 
+            else if (active_win == name_win)
             {
-                mvwaddch(name_win, cursory, cursorx, c);
-                cursorx++;
+                if (c == KEY_DOWN || c == MS_KEY_DOWN)
+                {
+                    unhighlight_window(active_win);
+                    active_win = avatar_win;
+                }
+                else if (c == KEY_RIGHT || c == MS_KEY_RIGHT)
+                {
+                    unhighlight_window(active_win);
+                    active_win = class_win;
+                }
+                highlight_window(active_win);
             }
-            wrefresh(name_win);
+            else if (active_win == avatar_win)
+            {
+                if (c == KEY_UP || c == MS_KEY_UP)
+                {
+                    unhighlight_window(active_win);
+                    active_win = name_win;
+                }
+                else if (c == KEY_RIGHT || c == MS_KEY_RIGHT)
+                {
+                    unhighlight_window(active_win);
+                    active_win = class_win;
+                }
+                highlight_window(active_win);
+            }
+            else if (active_win == class_win)
+            {
+                if (c == KEY_LEFT || c == MS_KEY_LEFT)
+                {
+                    unhighlight_window(active_win);
+                    active_win = name_win;
+                }
+                else if (c == KEY_RIGHT || c == MS_KEY_RIGHT)
+                {
+                    unhighlight_window(active_win);
+                    active_win = stat_win;
+                }
+                highlight_window(active_win);
+            }
+            else if (active_win == stat_win)
+            {
+                if (c == KEY_LEFT || c == MS_KEY_LEFT)
+                {
+                    unhighlight_window(active_win);
+                    active_win = class_win;
+                }
+                highlight_window(active_win);
+            }
+        }
+        else
+        {
+            mvwaddstr(tip_win, 0, 0, "TAB: Control mode; ARROW: Move");
+            wrefresh(tip_win);
+            if (active_win == name_win)
+            {
+                if (cursorx > 7 && (c == KEY_BACKSPACE || c == MS_KEY_BACKSPACE))
+                {
+                    cursorx--;
+                    mvwaddch(name_win, cursory, cursorx, ' ');
+                    wmove(name_win, cursory, cursorx);
+                }
+                else if (cursorx < 27 && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == ' ' || c == '\''))
+                {
+                    mvwaddch(name_win, cursory, cursorx, c);
+                    cursorx++;
+                }
+            }
+            else if (active_win == class_win)
+            {
+
+            }
+            wrefresh(active_win);
         }
     }
 

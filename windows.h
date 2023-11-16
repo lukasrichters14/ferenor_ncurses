@@ -17,4 +17,8 @@ WINDOW* create_help_window();
 
 WINDOW* create_tip_window();
 
+void highlight_window(WINDOW* w);
+
+void unhighlight_window(WINDOW* w);
+
 #endif

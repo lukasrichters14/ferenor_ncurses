@@ -75,6 +75,19 @@ WINDOW* create_help_window()
 WINDOW* create_tip_window()
 {
     WINDOW* w = create_window(3, 60, 25, 0, false);
+    mvwaddstr(w, 0, 0, "TAB: Control mode; ARROW: Move");
     wrefresh(w);
     return w;
+}
+
+void highlight_window(WINDOW* w)
+{
+    wborder(w, '#', '#', '#', '#', '+', '+', '+', '+');
+    wrefresh(w);
+}
+
+void unhighlight_window(WINDOW* w)
+{
+    wborder(w, '|', '|', '-', '-', '+', '+', '+', '+');
+    wrefresh(w);
 }

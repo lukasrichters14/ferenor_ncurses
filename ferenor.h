@@ -12,8 +12,6 @@
 #define MS_KEY_RIGHT '\005'
 #define MS_KEY_ESC '\033'
 #define MS_KEY_ENTER '\n'
-#define MS_KEY_F1 '\t'
-
-int handle_quit(char c, bool mode, WINDOW* w);
+#define MS_KEY_TAB '\t'
 
 #endif
