@@ -6,6 +6,10 @@ int main()
     refresh();  // This needs to be here to make the windows appear.
     cbreak();
     noecho();
+    start_color();
+
+    init_pair(NORMAL_TEXT, COLOR_WHITE, COLOR_BLACK);
+    init_pair(HIGHLIGHT_TEXT, COLOR_BLACK, COLOR_WHITE);
 
     WINDOW *active_win;
     WINDOW *name_win = create_name_entry_window();
@@ -14,6 +18,9 @@ int main()
     WINDOW *stat_win = create_stats_window();
     WINDOW *help_win = create_help_window();
     WINDOW *tip_win = create_tip_window();
+
+    chtype scr_text[25];
+    memset(scr_text, '0', sizeof(scr_text));
 
     keypad(stdscr, TRUE);
     keypad(name_win, TRUE);
@@ -54,6 +61,24 @@ int main()
                 mvwaddstr(tip_win, 0, 0, "TAB: Control mode; ARROW: Move");
                 wrefresh(tip_win);
                 unhighlight_window(active_win);
+
+                if (active_win == name_win)
+                {
+                    cursory = 1;
+                    cursorx = 7;
+                    wmove(name_win, cursory, cursorx);
+                }
+                else if (active_win == class_win || active_win == stat_win)
+                {
+                    cursory = 3;
+                    cursorx = 1;
+                    wmove(active_win, cursory, cursorx);
+                    memset(scr_text, '0', sizeof(scr_text));
+                    mvwinchstr(active_win, cursory, cursorx, scr_text);
+                    highlight_text_chtype(active_win, scr_text, cursory, cursorx);
+                }
+
+                wrefresh(active_win);
             }
             else if (active_win == name_win)
             {
@@ -125,9 +150,28 @@ int main()
                     cursorx++;
                 }
             }
-            else if (active_win == class_win)
+            else if (active_win == class_win || active_win == stat_win)
             {
-
+                if (cursory < 6 && (c == KEY_DOWN || c == MS_KEY_DOWN))
+                {
+                    unhighlight_text_chtype(active_win, scr_text, cursory, cursorx); 
+                    cursory++;
+                    memset(scr_text, '0', sizeof(scr_text));
+                    mvwinchstr(active_win, cursory, cursorx, scr_text);
+                    highlight_text_chtype(active_win, scr_text, cursory, cursorx);
+                }
+                else if (cursory > 3 && (c == KEY_UP || c == MS_KEY_UP))
+                {
+                    unhighlight_text_chtype(active_win, scr_text, cursory, cursorx);
+                    cursory--;
+                    memset(scr_text, '0', sizeof(scr_text));
+                    mvwinchstr(active_win, cursory, cursorx, scr_text);
+                    if (strcmp(scr_text, "Druid") == 0)
+                    {
+                        write_string_to_window(help_win, "This is for the druid");
+                    }
+                    highlight_text_chtype(active_win, scr_text, cursory, cursorx);
+                }
             }
             wrefresh(active_win);
         }

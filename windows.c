@@ -91,3 +91,65 @@ void unhighlight_window(WINDOW* w)
     wborder(w, '|', '|', '-', '-', '+', '+', '+', '+');
     wrefresh(w);
 }
+
+void highlight_text(WINDOW* w, char* text, int y, int x)
+{
+    wattron(w, COLOR_PAIR(HIGHLIGHT_TEXT));
+    mvwaddstr(w, y, x, text);
+    wattroff(w, COLOR_PAIR(HIGHLIGHT_TEXT));
+    wrefresh(w);
+}
+
+void unhighlight_text(WINDOW* w, char* text, int y, int x)
+{
+    wattron(w, COLOR_PAIR(NORMAL_TEXT));
+    mvwaddstr(w, y, x, text);
+    wattroff(w, COLOR_PAIR(NORMAL_TEXT));
+    wrefresh(w);
+}
+
+void highlight_text_chtype(WINDOW* w, chtype* text, int y, int x)
+{
+    char t[25];
+     (text, t);
+    highlight_text(w, t, y, x);
+}
+
+void unhighlight_text_chtype(WINDOW* w, chtype* text, int y, int x)
+{
+    char t[25];
+    get_char_from_chtype(text, t);
+    unhighlight_text(w, t, y, x);
+}
+
+void get_char_from_chtype(chtype* to_convert, char* text)
+{
+    for (int i = 0; i < 25; i++)
+    {
+        text[i] = to_convert[i] & A_CHARTEXT;
+    }
+}
+
+void write_string_to_window(WINDOW* w, char* s)
+{
+    int i = 0;
+    int x = 1;
+    int y = 1;
+    while (s[i] != '\0')
+    {
+        mvwaddch(w, y, x, s[i]);
+        i++;
+        x++;
+        if (x > HELP_WIN_WIDTH - 2)
+        {
+            mvwaddch(w, y, x, '-');
+            x = 1;
+            y++;
+        }
+    }
+}
+
+int chtype_strcmp(chtype* s1, const char* s2)
+{
+
+}
