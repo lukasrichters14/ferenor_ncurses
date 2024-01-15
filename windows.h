@@ -3,6 +3,8 @@
 
 #include <ncurses.h>
 #include <string.h>
+#include "window_status.h"
+#include "keys.h"
 
 #define NORMAL_TEXT 1
 #define HIGHLIGHT_TEXT 2
@@ -22,6 +24,10 @@ WINDOW* create_stats_window();
 WINDOW* create_help_window();
 
 WINDOW* create_tip_window();
+
+void name_window(WINDOW* w, WindowStatus* status, char return_char);
+
+void class_window(WINDOW* w, WindowStatus* status, char return_char);
 
 void highlight_window(WINDOW* w);
 

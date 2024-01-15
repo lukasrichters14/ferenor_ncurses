@@ -151,5 +151,66 @@ void write_string_to_window(WINDOW* w, char* s)
 
 int chtype_strcmp(chtype* s1, const char* s2)
 {
+    return 0;
+}
 
+void name_window(WINDOW* w, WindowStatus* status, char return_char)
+{
+    char c = status->prev_char;
+    int cursorx = status->cursorx;
+    int cursory = status->cursory;
+    while (c != return_char)
+    {
+        if (cursorx > 7 && (c == KEY_BACKSPACE || c == MS_KEY_BACKSPACE))
+        {
+            cursorx--;
+            mvwaddch(w, cursory, cursorx, ' ');
+            wmove(w, cursory, cursorx);
+        }
+        else if (cursorx < 27 && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == ' ' || c == '\''))
+        {
+            mvwaddch(w, cursory, cursorx, c);
+            cursorx++;
+        }
+        c = wgetch(w);
+    }
+    status->cursorx = cursorx;
+    status->cursory = cursory;
+}
+
+void class_window(WINDOW* w, WindowStatus* status, char return_char)
+{
+    char c = status->prev_char;
+    int cursorx = status->cursorx;
+    int cursory = status->cursory;
+
+    chtype scr_text[25];
+    memset(scr_text, '\0', sizeof(scr_text));
+
+    while (c != return_char)
+    {
+        if (cursory < 6 && (c == KEY_DOWN || c == MS_KEY_DOWN))
+        {
+            unhighlight_text_chtype(w, scr_text, cursory, cursorx); 
+            cursory++;
+            memset(scr_text, '\0', sizeof(scr_text));
+            mvwinchstr(w, cursory, cursorx, scr_text);
+            highlight_text_chtype(w, scr_text, cursory, cursorx);
+        }
+        else if (cursory > 3 && (c == KEY_UP || c == MS_KEY_UP))
+        {
+            unhighlight_text_chtype(w, scr_text, cursory, cursorx);
+            cursory--;
+            memset(scr_text, '\0', sizeof(scr_text));
+            mvwinchstr(w, cursory, cursorx, scr_text);
+            if (chtype_strcmp(scr_text, "Druid") == 0)
+            {
+                write_string_to_window(status->help_w, "This is for the druid");
+            }
+            highlight_text_chtype(w, scr_text, cursory, cursorx);
+        }
+        c = wgetch(w);
+    }
+    status->cursorx = cursorx;
+    status->cursory = cursory;
 }

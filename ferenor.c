@@ -19,9 +19,6 @@ int main()
     WINDOW *help_win = create_help_window();
     WINDOW *tip_win = create_tip_window();
 
-    chtype scr_text[25];
-    memset(scr_text, '0', sizeof(scr_text));
-
     keypad(stdscr, TRUE);
     keypad(name_win, TRUE);
     keypad(avatar_win, TRUE);
@@ -34,6 +31,7 @@ int main()
     wrefresh(name_win);
 
     active_win = name_win;
+    struct WindowStatus status;
     int cursorx, cursory;
     cursorx = 7;
     cursory = 1;
@@ -73,9 +71,9 @@ int main()
                     cursory = 3;
                     cursorx = 1;
                     wmove(active_win, cursory, cursorx);
-                    memset(scr_text, '0', sizeof(scr_text));
-                    mvwinchstr(active_win, cursory, cursorx, scr_text);
-                    highlight_text_chtype(active_win, scr_text, cursory, cursorx);
+                    // memset(scr_text, '0', sizeof(scr_text));
+                    // mvwinchstr(active_win, cursory, cursorx, scr_text);
+                    // highlight_text_chtype(active_win, scr_text, cursory, cursorx);
                 }
 
                 wrefresh(active_win);
@@ -136,44 +134,15 @@ int main()
         {
             mvwaddstr(tip_win, 0, 0, "TAB: Control mode; ARROW: Move");
             wrefresh(tip_win);
-            if (active_win == name_win)
-            {
-                if (cursorx > 7 && (c == KEY_BACKSPACE || c == MS_KEY_BACKSPACE))
-                {
-                    cursorx--;
-                    mvwaddch(name_win, cursory, cursorx, ' ');
-                    wmove(name_win, cursory, cursorx);
-                }
-                else if (cursorx < 27 && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == ' ' || c == '\''))
-                {
-                    mvwaddch(name_win, cursory, cursorx, c);
-                    cursorx++;
-                }
-            }
-            else if (active_win == class_win || active_win == stat_win)
-            {
-                if (cursory < 6 && (c == KEY_DOWN || c == MS_KEY_DOWN))
-                {
-                    unhighlight_text_chtype(active_win, scr_text, cursory, cursorx); 
-                    cursory++;
-                    memset(scr_text, '0', sizeof(scr_text));
-                    mvwinchstr(active_win, cursory, cursorx, scr_text);
-                    highlight_text_chtype(active_win, scr_text, cursory, cursorx);
-                }
-                else if (cursory > 3 && (c == KEY_UP || c == MS_KEY_UP))
-                {
-                    unhighlight_text_chtype(active_win, scr_text, cursory, cursorx);
-                    cursory--;
-                    memset(scr_text, '0', sizeof(scr_text));
-                    mvwinchstr(active_win, cursory, cursorx, scr_text);
-                    if (strcmp(scr_text, "Druid") == 0)
-                    {
-                        write_string_to_window(help_win, "This is for the druid");
-                    }
-                    highlight_text_chtype(active_win, scr_text, cursory, cursorx);
-                }
-            }
+            
+            status.cursorx = cursorx;
+            status.cursory = cursory;
+            status.prev_char = c;
+            
+            if (active_win == name_win) { name_window(name_win, &status, MS_KEY_TAB); }
+            else if (active_win == class_win) { class_window(class_win, &status, MS_KEY_TAB); }
             wrefresh(active_win);
+            is_in_select_mode = true;
         }
     }
 
@@ -186,4 +155,3 @@ int main()
     endwin();
     return 0;
 }
-
